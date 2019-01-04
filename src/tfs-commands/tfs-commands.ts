@@ -101,6 +101,40 @@ export class TfsCommands {
         }
     }
 
+    public async checkoutFilePath(filePath: string,
+                                  recursive: boolean,
+                                  onSuccess?: (message: string) => void,
+                                  onError?: (chunk: string | Buffer) => void
+    ): Promise<void> {
+        if (filePath) {
+            const initialArgs: string[] = ['checkout', filePath];
+            if (recursive) {
+                initialArgs.push('/recursive');
+            }
+            const stdout: (chunk: string | Buffer) => void = (chunk: string | Buffer): void => {
+                if (chunk) {
+                    const decoder: TextDecoder = new TextDecoder('utf-8');
+                    const content: string = decoder.decode(chunk as Buffer);
+                    if (onSuccess) {
+                        console.log('content');
+                        onSuccess(content);
+                    }
+                }
+            };
+
+            const stdErrorData: (chunk: string | Buffer) => void = (chunk: string | Buffer): void => {
+                if (onError && chunk) {
+                    const decoder: TextDecoder = new TextDecoder('utf-8');
+                    const content: string = decoder.decode(chunk as Buffer);
+                    onError(content);
+                }
+            };
+
+
+            this.executeTfsCommand(initialArgs, stdout, stdErrorData, undefined, undefined, undefined);
+        }
+    }
+
     /**
      * Get the path to TF.exe file that is used to run commands
      * TODO - based on system get the right file location

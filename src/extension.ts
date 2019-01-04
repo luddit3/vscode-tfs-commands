@@ -3,11 +3,13 @@
 import * as vscode from 'vscode';
 import { ChangesFileExplorer } from './changes-tree-view/changes-file-explorer';
 import { History } from './history/history';
+import { TfsCommands } from './tfs-commands/tfs-commands';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext): void {
     const tfs: any = require('tfs');
+    const tfsCommands: TfsCommands = new TfsCommands();
 
     vscode.workspace.onDidChangeTextDocument(() => {
         if (vscode.window.activeTextEditor === undefined || vscode.window.activeTextEditor.document.isDirty) {
@@ -15,7 +17,7 @@ export function activate(context: vscode.ExtensionContext): void {
         }
 
         if (vscode.window.activeTextEditor) {
-            checkoutFile(tfs, vscode.window.activeTextEditor.document.fileName);
+            tfsCommands.checkoutFilePath(vscode.window.activeTextEditor.document.fileName, false);
         }
     });
 
@@ -23,16 +25,11 @@ export function activate(context: vscode.ExtensionContext): void {
         getLatest(tfs, uri);
     });
 
-    const tfsGetFromSource: vscode.Disposable = vscode.commands.registerCommand('extension.tfsGetFromSource', () => {
-        getLatest(tfs);
-    });
-
     const tfsCheckout: vscode.Disposable = vscode.commands.registerCommand('extension.tfsCheckout', (uri: vscode.Uri) => {
-        checkoutFile(tfs, uri.fsPath, checkoutCallback);
+        tfsCommands.checkoutFilePath(uri.fsPath, true);
     });
 
     context.subscriptions.push(tfsGet);
-    context.subscriptions.push(tfsGetFromSource);
     context.subscriptions.push(tfsCheckout);
 
     // tslint:disable-next-line:no-unused-expression
@@ -63,7 +60,6 @@ const showResponseMessage: (responseError: any, response: any) => void = (respon
 };
 
 function getLatest(tfs: any, uri?: vscode.Uri): void {
-    const sourcePath: string = 'C:\\Dev\\PEX\\Main\\Source';
     const progressOptions: vscode.ProgressOptions = {
         location: vscode.ProgressLocation.Notification,
         title: 'Getting Latest'
@@ -72,7 +68,7 @@ function getLatest(tfs: any, uri?: vscode.Uri): void {
         progress.report({ increment: 50, location: vscode.ProgressLocation.Notification, title: 'Getting Latest' });
 
         return new Promise((resolve: (value?: any | PromiseLike<any>) => void, reject: (reason?: any) => void): void => {
-            resolve(tfs('get', [uri && uri.fsPath ? uri.fsPath : sourcePath], { recursive: true }, showResponseMessage));
+            resolve(tfs('get', [uri && uri.fsPath ? uri.fsPath : ''], { recursive: true }, showResponseMessage));
         }).then(() => {
             progress.report({ increment: 100, location: vscode.ProgressLocation.Notification, title: 'Getting Latest' });
 
@@ -80,18 +76,3 @@ function getLatest(tfs: any, uri?: vscode.Uri): void {
         });
     });
 }
-
-function checkoutFile(tfs: any, checkoutPath: string, callback?: (responseError: any, response: any) => void): void {
-    tfs('checkout', [checkoutPath], { recursive: true }, callback ? callback : null);
-}
-
-const checkoutCallback: any = (responseError: any, response: any): void => {
-    const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Checked out files');
-    if (response) {
-        vscode.window.showInformationMessage('All files checked out successfully');
-    }
-    if (responseError) {
-        outputChannel.append(responseError.error);
-    }
-    outputChannel.show();
-};
