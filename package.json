@@ -1,0 +1,117 @@
+{
+    "name": "vscode-tfs",
+    "displayName": "vscode-tfs",
+    "description": "A VSCode Extension to run various TFS commands from the file explorer and when editing files.",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.29.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "*",
+        "onCommand:extension.tfsGet",
+        "onCommand:extension.tfsGetFromSource",
+        "onCommand:extension.tfsViewHistory",
+        "onCommand:extension.tfsDiffLatestVersion",
+        "onCommand:extension.tfsDiffChangesets",
+        "onCommand:extension.tfsCheckout",
+        "onView:changesFileExplorer"
+    ],
+    "main": "./out/extension",
+    "contributes": {
+        "viewsContainers": {
+            "activitybar": [{
+                "id": "pendingChanges",
+                "title": "Pending Changes",
+                "icon": "src/assets/images/clock-regular.svg"
+            }]
+        },
+        "commands": [{
+                "command": "extension.tfsGet",
+                "title": "Get Latest"
+            },
+            {
+                "command": "extension.tfsGetFromSource",
+                "title": "Get Latest From Source"
+            },
+            {
+                "command": "extension.tfsViewHistory",
+                "title": "View Changeset History"
+            },
+            {
+                "command": "extension.tfsDiffChangesets",
+                "title": "Diff Changesets"
+            },
+            {
+                "command": "extension.tfsCheckout",
+                "title": "Checkout for Edit"
+            },
+            {
+                "command": "fileExplorer.openFile",
+                "title": "Open File"
+            },
+            {
+                "command": "tfs.undoChanges",
+                "title": "Undo Changes"
+            },
+            {
+                "command": "tfs.diff",
+                "title": "Diff Latest"
+            }
+        ],
+        "views": {
+            "pendingChanges": [{
+                "id": "changesFileExplorer",
+                "name": "Included Changes"
+            }]
+        },
+        "menus": {
+            "explorer/context": [{
+                    "command": "extension.tfsGet",
+                    "group": "TFS Commands"
+                },
+                {
+                    "command": "extension.tfsViewHistory",
+                    "group": "TFS Commands"
+                },
+                {
+                    "command": "extension.tfsCheckout",
+                    "group": "TFS Commands"
+                },
+                {
+                    "when": "!explorerResourceIsFolder",
+                    "command": "extension.tfsDiffChangesets",
+                    "group": "TFS Commands"
+                }
+            ],
+            "view/item/context": [{
+                "command": "tfs.undoChanges"
+            }]
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.21",
+        "tslint": "^5.8.0",
+        "@types/mkdirp": "^0.5.2",
+        "@types/node": "*",
+        "@types/rimraf": "^2.0.2",
+        "@types/mocha": "^2.2.42"
+    },
+    "dependencies": {
+        "fs": "0.0.1-security",
+        "mkdirp": "^0.5.1",
+        "path": "^0.12.7",
+        "rimraf": "^2.6.2",
+        "tfs": "^1.5.0"
+    }
+}
