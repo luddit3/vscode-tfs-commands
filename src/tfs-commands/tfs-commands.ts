@@ -29,7 +29,7 @@ export class TfsCommands {
                       onExit?: (code: number, signal: string) => void
     ): void {
         if (filePath) {
-            const args: string[] = ['history', filePath, '/recursive', '/format:Detailed', `/stopafter:${count.toString()}`];
+            const args: string[] = ['history', filePath, '/recursive', '/format:detailed', `/stopafter:${count.toString()}`];
             let changesetData: string = '';
             const stdout: (chunk: string | Buffer) => void = (chunk: string | Buffer): void => {
                 if (chunk) {
@@ -98,6 +98,57 @@ export class TfsCommands {
 
             this.executeTfsCommand(initialArgs, stdout, undefined, undefined, undefined, close);
 
+        }
+    }
+
+    public getPreviousVersion(filePath: string, changesetId: number,
+                              onSuccess?: (changeSets: Changeset[]) => void,
+                              onStdError?: (chunk: string | Buffer) => void,
+                              onError?: (error: Error) => void,
+                              onExit?: (code: number, signal: string) => void
+    ): void {
+        if (filePath) {
+            const args: string[] = ['history', filePath, '/format:detailed', `/v:${changesetId.toString()}`, '/stopafter:2'];
+            let changesetData: string = '';
+            const stdout: (chunk: string | Buffer) => void = (chunk: string | Buffer): void => {
+                if (chunk) {
+                    const decoder: TextDecoder = new TextDecoder('utf-8');
+                    const content: string = decoder.decode(chunk as Buffer);
+                    changesetData += content;
+                }
+            };
+
+            const stdErrorData: (chunk: string | Buffer) => void = (chunk: string | Buffer): void => {
+                const decoder: TextDecoder = new TextDecoder('utf-8');
+                const content: string = decoder.decode(chunk as Buffer);
+                console.log(content);
+                if (onStdError && chunk) {
+                    onStdError(chunk);
+                }
+            };
+
+            const exit: (code: number, signal: string) => void = (code: number, signal: string): void => {
+                if (onExit) {
+                    onExit(code, signal);
+                }
+            };
+
+            const error: (error: Error) => void = (error: Error): void => {
+                if (onError) {
+                    onError(error);
+                }
+            };
+
+            const close: (code: number, signal: string) => void = (code: number, signal: string): void => {
+                const changesetSplit: string[] = changesetData.split('-------------------------------------------------------------------------------');
+                changesetSplit.splice(0, 1);
+                const changesets: Changeset[] = changesetSplit.map(s => new Changeset(s));
+                if (onSuccess) {
+                    onSuccess(changesets);
+                }
+            };
+
+            this.executeTfsCommand(args, stdout, stdErrorData, error, exit, close);
         }
     }
 

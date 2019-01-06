@@ -5,6 +5,7 @@ import { HistoryMenuSelection } from '../models/history-menu-selection.model';
 import { FilesMenuSelection } from '../models/files-menu-selection.model';
 import * as fs from 'fs';
 import * as os from 'os';
+import { ChangesetFileSystemProvider, ChangesetFile } from '../changeset-tree-view/changeset-file-provider';
 
 export class History {
 
@@ -89,7 +90,7 @@ export class History {
 
     private onDidSelectChangeset(item: vscode.QuickPickItem | undefined): void {
         if (item) {
-            const historyMenuOptions: string[] = [HistoryMenuSelection.ViewCompleteDetails, HistoryMenuSelection.ListFilesInChangeset];
+            const historyMenuOptions: string[] = [HistoryMenuSelection.ViewCompleteDetails, HistoryMenuSelection.ViewAllChangesetFileDiffs, HistoryMenuSelection.ListFilesInChangeset];
             const options: vscode.QuickPickOptions = {
                 placeHolder: `Select options for changeset: ${item.label}...`,
                 matchOnDescription: true,
@@ -108,11 +109,25 @@ export class History {
                             this.showChangesetFilesListQuickPick(selectedChangeset);
                         }
                         break;
+                    case HistoryMenuSelection.ViewAllChangesetFileDiffs:
+                        if (selectedChangeset) {
+                            this.showChangesetFileDiffPanel(selectedChangeset);
+                        }
+                        break;
                     default:
                         break;
                 }
             });
         }
+    }
+
+    private showChangesetFileDiffPanel(selectedChangeset: Changeset): void {
+        const changesets: ChangesetFile[] = selectedChangeset.items.map(s => new ChangesetFile(s.path, s.path, selectedChangeset, vscode.TreeItemCollapsibleState.Expanded));
+        const treeDataProvider: ChangesetFileSystemProvider = new ChangesetFileSystemProvider(changesets);
+        vscode.window.createTreeView('changesetFileExplorer', { treeDataProvider: treeDataProvider });
+        vscode.commands.executeCommand('changesetFileExplorer.focus').then(() => {
+
+        });
     }
 
     private showChangesetFilesListQuickPick(selectedChangeset: Changeset): void {
@@ -179,5 +194,6 @@ export class History {
         };
         vscode.window.showQuickPick(changeSelections, options).then(this.onDidSelectChangeset.bind(this));
     }
+
 
 }

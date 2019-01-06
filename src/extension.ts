@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { ChangesFileExplorer } from './changes-tree-view/changes-file-explorer';
+import { ChangesetFileExplorer } from './changeset-tree-view/changeset-file-explorer';
 import { History } from './history/history';
 import { TfsCommands } from './tfs-commands/tfs-commands';
 
@@ -37,6 +38,10 @@ export function activate(context: vscode.ExtensionContext): void {
 
     // tslint:disable-next-line:no-unused-expression
     new History(context);
+
+    // tslint:disable-next-line:no-unused-expression
+    new ChangesetFileExplorer();
+
 }
 
 // this method is called when your extension is deactivated

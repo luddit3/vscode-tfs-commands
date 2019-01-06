@@ -16,16 +16,23 @@
         "onCommand:extension.tfsDiffLatestVersion",
         "onCommand:extension.tfsDiffChangesets",
         "onCommand:extension.tfsCheckout",
-        "onView:changesFileExplorer"
+        "onView:changesFileExplorer",
+        "onView:changesetFileExplorer"
     ],
     "main": "./out/extension",
     "contributes": {
         "viewsContainers": {
             "activitybar": [{
-                "id": "pendingChanges",
-                "title": "Pending Changes",
-                "icon": "src/assets/images/clock-regular.svg"
-            }]
+                    "id": "pendingChanges",
+                    "title": "Pending Changes",
+                    "icon": "src/assets/images/clock-regular.svg"
+                },
+                {
+                    "id": "changesetDiff",
+                    "title": "Changeset Files",
+                    "icon": "src/assets/images/copy.svg"
+                }
+            ]
         },
         "commands": [{
                 "command": "extension.tfsGet",
@@ -48,6 +55,10 @@
                 "title": "Open File"
             },
             {
+                "command": "changesExplorer.openDiff",
+                "title": "Open File Diff"
+            },
+            {
                 "command": "tfs.undoChanges",
                 "title": "Undo Changes"
             },
@@ -60,6 +71,10 @@
             "pendingChanges": [{
                 "id": "changesFileExplorer",
                 "name": "Included Changes"
+            }],
+            "changesetDiff": [{
+                "id": "changesetFileExplorer",
+                "name": "Changeset Files"
             }]
         },
         "menus": {
@@ -94,16 +109,18 @@
         "test": "npm run compile && node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
-        "typescript": "^2.6.1",
-        "vscode": "^1.1.21",
-        "tslint": "^5.8.0",
+        "@types/lodash": "^4.14.119",
         "@types/mkdirp": "^0.5.2",
+        "@types/mocha": "^2.2.42",
         "@types/node": "*",
         "@types/rimraf": "^2.0.2",
-        "@types/mocha": "^2.2.42"
+        "tslint": "^5.8.0",
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.21"
     },
     "dependencies": {
         "fs": "0.0.1-security",
+        "lodash": "^4.17.11",
         "mkdirp": "^0.5.1",
         "path": "^0.12.7",
         "rimraf": "^2.6.2",
